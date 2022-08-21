@@ -26,8 +26,8 @@
 // Constraints:
 // 1 <= target, startFuel <= 109
 // 0 <= stations.length <= 500
-// 0 <= position[i] <= position[i] + 1 < target
-// 1 <= fuel[i] < 109
+// 0 <= position[i] <= position[i + 1] < target
+// 1 <= fuel[i] < 10^9
 
 public class Solution 
 {
