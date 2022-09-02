@@ -86,4 +86,36 @@ public class Solution
         }
         return list.GroupBy(x => x.Level).Select(x => (double)x.Sum(y => (long)y.Value) / x.Count()).ToArray();
     }
+    
+    // Recursive solution
+    public IList<double> AverageOfLevels(TreeNode root) 
+    {
+        IList<double> res = new List<double>();
+        IList<int> count = new List<int>();
+        
+        if(root == null) return res;
+        Average(root, 0, res, count);
+        
+        for (int i = 0; i < res.Count; i++)
+            res[i] = res[i] / count[i];
+        return res;
+    }
+    
+    public void Average(TreeNode t, int i, IList<double> sum, IList<int> count) 
+    {
+        if (t == null)
+            return;
+        if (i < sum.Count) 
+        {
+            sum[i] += t.val;
+            count[i] += 1;
+        } 
+        else 
+        {
+            sum.Add(1.0 * t.val);
+            count.Add(1);
+        }
+        Average(t.left, i + 1, sum, count);
+        Average(t.right, i + 1, sum, count);
+    }
 }
