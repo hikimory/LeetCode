@@ -1,39 +1,53 @@
-// Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
-// You may assume that each input would have exactly one solution, and you may not use the same element twice.
-// You can return the answer in any order.
+// Given the head of a singly linked list, reverse the list, and return the reversed list.
 
 // Example 1:
-// Input: nums = [2,7,11,15], target = 9
-// Output: [0,1]
-// Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].
+// Input: head = [1,2,3,4,5]
+// Output: [5,4,3,2,1]
 
 // Example 2:
-// Input: nums = [3,2,4], target = 6
-// Output: [1,2]
+// Input: head = [1,2]
+// Output: [2,1]
 
 // Example 3:
-// Input: nums = [3,3], target = 6
-// Output: [0,1]
+// Input: head = []
+// Output: []
 
 // Constraints:
-// 2 <= nums.length <= 10^4
-// -10^9 <= nums[i] <= 10^9
-// -10^9 <= target <= 10^9
-// Only one valid answer exists.
+// The number of nodes in the list is the range [0, 5000].
+// -5000 <= Node.val <= 5000
+
+// Follow up: A linked list can be reversed either iteratively or recursively. Could you implement both?
+
 
 public class Solution 
 {
-    public int[] TwoSum(int[] nums, int target) 
+    //iterative solution
+    public ListNode ReverseListI(ListNode head) 
     {
-        Dictionary<int, int> d = new Dictionary<int, int>();
-        for(int i = 0; i < nums.Length; i++)
+        if (head == null) return head;
+
+        ListNode prev = null, next = null, current = head;
+
+        while (current != null)
         {
-            int comlement = target - nums[i];
-            if(d.ContainsKey(comlement))
-                return new int[] {d[comlement], i};
-            else if(!d.ContainsKey(nums[i]))
-                d.Add(nums[i], i);
+            next = current.next;
+            current.next = prev;
+            prev = current;
+            current = next;
         }
-        throw new ArgumentException("No two sum solution");
+
+        return prev;    
+    }
+    
+    //recursive solution
+    public ListNode ReverseListR(ListNode head) 
+    {
+        if (head == null || head.next == null)
+            return head;
+
+        ListNode newnode = ReverseList2(head.next);
+        head.next.next = head;
+        head.next = null;
+        return newnode;    
     }
 }
