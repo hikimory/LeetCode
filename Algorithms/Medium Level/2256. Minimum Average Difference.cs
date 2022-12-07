@@ -1,103 +1,89 @@
-// Given an n-ary tree, return the level order traversal of its nodes' values.
-// Nary-Tree input serialization is represented in their level order traversal, 
-// each group of children is separated by the null value (See examples).
+// You are given a 0-indexed integer array nums of length n.
+// The average difference of the index i is the absolute difference between the average of the first i + 1 elements of nums and the average of the last n - i - 1 elements. 
+// Both averages should be rounded down to the nearest integer.
+// Return the index with the minimum average difference. If there are multiple such indices, return the smallest one.
+
+// Note:
+// The absolute difference of two numbers is the absolute value of their difference.
+// The average of n elements is the sum of the n elements divided (integer division) by n.
+// The average of 0 elements is considered to be 0.
 
 // Example 1:
-//             (3)
-//           /  |  \
-//         (3) (2) (4)
-//         / \
-//       (5) (6)
-// Input: root = [1,null,3,2,4,null,5,6]
-// Output: [[1],[3,2,4],[5,6]]
+// Input: nums = [2,5,3,9,5,3]
+// Output: 3
+// Explanation:
+// - The average difference of index 0 is: |2 / 1 - (5 + 3 + 9 + 5 + 3) / 5| = |2 / 1 - 25 / 5| = |2 - 5| = 3.
+// - The average difference of index 1 is: |(2 + 5) / 2 - (3 + 9 + 5 + 3) / 4| = |7 / 2 - 20 / 4| = |3 - 5| = 2.
+// - The average difference of index 2 is: |(2 + 5 + 3) / 3 - (9 + 5 + 3) / 3| = |10 / 3 - 17 / 3| = |3 - 5| = 2.
+// - The average difference of index 3 is: |(2 + 5 + 3 + 9) / 4 - (5 + 3) / 2| = |19 / 4 - 8 / 2| = |4 - 4| = 0.
+// - The average difference of index 4 is: |(2 + 5 + 3 + 9 + 5) / 5 - 3 / 1| = |24 / 5 - 3 / 1| = |4 - 3| = 1.
+// - The average difference of index 5 is: |(2 + 5 + 3 + 9 + 5 + 3) / 6 - 0| = |27 / 6 - 0| = |4 - 0| = 4.
+// The average difference of index 3 is the minimum average difference so return 3.
 
 // Example 2:
-// Input: root = [1,null,2,3,4,5,null,null,6,7,null,8,null,9,10,null,null,11,null,12,null,13,null,null,14]
-// Output: [[1],[2,3,4,5],[6,7,8,9,10],[11,12,13],[14]] 
+// Input: nums = [0]
+// Output: 0
+// Explanation:
+// The only index is 0 so return 0.
+// The average difference of index 0 is: |0 / 1 - 0| = |0 - 0| = 0.
 
 // Constraints:
-// The height of the n-ary tree is less than or equal to 1000
-// The total number of nodes is between [0, 10^4]
-
-/*
-// Definition for a Node.
-public class Node {
-    public int val;
-    public IList<Node> children;
-
-    public Node() {}
-
-    public Node(int _val) {
-        val = _val;
-    }
-
-    public Node(int _val, IList<Node> _children) {
-        val = _val;
-        children = _children;
-    }
-}
-*/
+// 1 <= nums.length <= 10^5
+// 0 <= nums[i] <= 10^5
 
 public class Solution 
 {
-    //Iterative solution
-    public IList<IList<int>> LevelOrder(Node root) 
+    public int MinimumAverageDifference(int[] nums) 
     {
-        List<IList<int>> result = new List<IList<int>>(); 
+        long rightSum = nums.Sum(n => (long)n), leftSum = 0, minAvg = Int64.MaxValue;
+        int N = nums.Length, res = 0;
         
-        if(root == null) return result;
-        
-        Queue<Node> queue = new Queue<Node>();
-        queue.Enqueue(root);
-        
-        while(queue.Count > 0)
+        for(int i = 0; i < N; i++)
         {
-            int count = queue.Count;
-            double sum = 0;
-            
-            List<int> level = new List<int>();
-            
-            for(int i = 0; i < count; i++)
+            leftSum += nums[i];
+            rightSum -= nums[i];
+            long leftAvg = leftSum/(i+1);
+            long rightAvg = N - i == 1 ? 0 : rightSum/(N - i - 1);
+            long diff = Math.Abs(leftAvg - rightAvg);
+            if(diff == 0) return i;
+            if(diff < minAvg)
             {
-                Node current = queue.Dequeue();
-                level.Add(current.val);
-                
-                if(current.children != null)
-                {
-                    foreach(var child in current.children)
-                    {
-                       queue.Enqueue(child);
-                    }
-                }
+                res = i;
+                minAvg = diff;
             }
-            
-            result.Add(level);
         }
-        return result;
+        return res;
     }
     
-    //Recursive solution
-    public IList<IList<int>> LevelOrder(Node root) 
+    //Prefix Sum
+    public int MinimumAverageDifference(int[] nums) 
     {
-        List<IList<int>> result = new List<IList<int>>(); 
+        int result = -1, N = nums.Length;
+        long minAvgDiff = Int64.MaxValue;
+        long[] arr = new long[N];
+        arr[0] = nums[0];
         
-        DFS(root, 0, result);
-        
-        return result;
-    }
-    
-    public void DFS(Node node, int level, List<IList<int>> result)
-    {
-        if(node == null) return;
-        
-        if(result.Count == level)
-            result.Add(new List<int>());
-        
-        result[level].Add(node.val);
-        
-        foreach(var child in node.children)
+        for (int i = 1; i < N; i++) 
         {
-            DFS(child, level + 1, result);
+            arr[i] = nums[i] + arr[i - 1];
         }
+
+        for (int i = 0; i < N; i++) 
+        {
+            long avgDiff = Int64.MaxValue;
+
+            if (i == N - 1)
+                avgDiff = Math.Abs(arr[i] / (i + 1));
+            else
+                avgDiff = Math.Abs((arr[i] / (i + 1)) - ((arr[N - 1] - arr[i]) / (N - 1 - i)));
+
+            if (avgDiff < minAvgDiff) 
+            {
+                minAvgDiff = avgDiff;
+                result = i;
+            }
+        }
+
+        return result;
     }
 }
