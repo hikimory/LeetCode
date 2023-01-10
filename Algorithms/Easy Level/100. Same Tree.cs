@@ -1,0 +1,67 @@
+// Given the roots of two binary trees p and q, write a function to check if they are the same or not.
+// Two binary trees are considered the same if they are structurally identical, and the nodes have the same value.
+
+// Example 1:
+//         (1)        (1)
+//         /  \       /  \
+//       (2)  (3)   (1) (3)
+// Input: p = [1,2,3], q = [1,2,3]
+// Output: true
+
+// Example 2:
+//         (1)    (1)
+//         /        \
+//       (2)        (2)
+// Input: p = [1,2], q = [1,null,2]
+// Output: false
+
+// Example 3:
+//         (1)        (1)
+//         /  \       /  \
+//       (2)  (1)   (1) (2)
+// Input: p = [1,2,1], q = [1,1,2]
+// Output: false
+
+// Constraints:
+// The number of nodes in both trees is in the range [0, 100].
+// -10^4 <= Node.val <= 10^4
+
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     public int val;
+ *     public TreeNode left;
+ *     public TreeNode right;
+ *     public TreeNode(int val=0, TreeNode left=null, TreeNode right=null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+public class Solution {
+    //Iterative solution
+    public bool IsSameTree(TreeNode p, TreeNode q) {
+        Queue<TreeNode> queue = new(); 
+        queue.Enqueue(p); queue.Enqueue(q);
+        while(queue.Count > 0){
+            TreeNode l = queue.Dequeue(), r = queue.Dequeue();
+            if(l == null && r == null) continue;
+            if(l == null || r == null) return false;
+            if(l.val != r.val) return false;
+            queue.Enqueue(l.left); queue.Enqueue(r.left);
+            queue.Enqueue(l.right); queue.Enqueue(r.right);
+        }
+        return true;
+    }
+    // Recursive solution
+    public bool IsSameTree(TreeNode p, TreeNode q) {
+        if(p == null && q == null) return true;
+        if(p == null || q == null) return false;
+        if(p.val != q.val)
+            return false;
+        else
+            return true && IsSameTree(p.left, q.left) && IsSameTree(p.right, q.right);
+    }
+}
