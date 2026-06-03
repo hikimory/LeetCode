@@ -1,47 +1,72 @@
-// You are given the array nums consisting of n positive integers. You computed the sum of all non-empty continuous subarrays from the array and then sorted them in non-decreasing order, creating a new array of n * (n + 1) / 2 numbers.
-// Return the sum of the numbers from index left to index right (indexed from 1), inclusive, in the new array. Since the answer can be a huge number return it modulo 10^9 + 7.
+// Given the root of a binary tree, split the binary tree into two subtrees by removing one edge such that the product of the sums of the subtrees is maximized.
+// Return the maximum product of the sums of the two subtrees. Since the answer may be too large, return it modulo 10^9 + 7.
+// Note that you need to maximize the answer before taking the mod and not after taking it.
 
 // Example 1:
-// Input: nums = [1,2,3,4], n = 4, left = 1, right = 5
-// Output: 13 
-// Explanation: All subarray sums are 1, 3, 6, 10, 2, 5, 9, 3, 7, 4. After sorting them in non-decreasing order we have the new array [1, 2, 3, 3, 4, 5, 6, 7, 9, 10]. The sum of the numbers from index le = 1 to ri = 5 is 1 + 2 + 3 + 3 + 4 = 13. 
+// Input: root = [1,2,3,4,5,6]
+// Output: 110
+// Explanation: Remove the red edge and get 2 binary trees with sum 11 and 10. Their product is 110 (11*10)
 
 // Example 2:
-// Input: nums = [1,2,3,4], n = 4, left = 3, right = 4
-// Output: 6
-// Explanation: The given array is the same as example 1. We have the new array [1, 2, 3, 3, 4, 5, 6, 7, 9, 10]. The sum of the numbers from index le = 3 to ri = 4 is 3 + 3 = 6.
-
-// Example 3:
-// Input: nums = [1,2,3,4], n = 4, left = 1, right = 10
-// Output: 50
+// Input: root = [1,null,2,3,4,null,null,5,6]
+// Output: 90
+// Explanation: Remove the red edge and get 2 binary trees with sum 15 and 6.Their product is 90 (15*6)
 
 // Constraints:
-// n == nums.length
-// 1 <= nums.length <= 1000
-// 1 <= nums[i] <= 100
-// 1 <= left <= right <= n * (n + 1) / 2
+//     The number of nodes in the tree is in the range [2, 5 * 10^4].
+//     1 <= Node.val <= 10^4
 
+
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     public int val;
+ *     public TreeNode left;
+ *     public TreeNode right;
+ *     public TreeNode(int val=0, TreeNode left=null, TreeNode right=null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
 public class Solution {
-    public int RangeSum(int[] nums, int n, int left, int right) {
-        List<int> sums = new List<int>();
-        for (int i = 0; i < nums.Length; i++)
-        {
-            int val = nums[i];
-            sums.Add(val);
-            for (int j = i + 1; j < nums.Length; j++)
-            {
-                val += nums[j];
-                sums.Add(val);
+    private long totalSum = 0;
+    private long maxProduct = 0;
+    private const int MOD = 1000000007;
+
+    public int MaxProduct(TreeNode root) {
+        totalSum = 0;
+        maxProduct = 0;
+
+        // ШАГ 1: Находим полную сумму дерева
+        totalSum = CalculateSum(root);
+
+        // ШАГ 2: Находим максимальное произведение
+        // Мы можем повторно использовать тот же метод, 
+        // так как он обновит maxProduct для каждого поддерева
+        CalculateSum(root);
+
+        // ШАГ 3: Возвращаем результат по модулю
+        return (int)(maxProduct % MOD);
+    }
+
+    private long CalculateSum(TreeNode node) {
+        if (node == null) return 0;
+
+        // Считаем сумму текущего поддерева
+        long currentSubtreeSum = node.val + CalculateSum(node.left) + CalculateSum(node.right);
+
+        // Формула работает корректно только тогда, когда totalSum уже посчитана (на втором проходе)
+        if (totalSum > 0) {
+            long remainingSum = totalSum - currentSubtreeSum;
+            long currentProduct = currentSubtreeSum * remainingSum;
+            
+            if (currentProduct > maxProduct) {
+                maxProduct = currentProduct;
             }
         }
-        sums.Sort();
 
-        long total = 0;
-        for (int i = left - 1; i < right; i++)
-        {
-            total += sums[i];
-        }
-
-        return (int)(total % 1000000007);
+        return currentSubtreeSum;
     }
 }
