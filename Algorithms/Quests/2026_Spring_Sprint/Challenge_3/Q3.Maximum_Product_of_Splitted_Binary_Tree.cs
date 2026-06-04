@@ -1,50 +1,72 @@
-// You are given a positive integer n, you can do the following operation any number of times:
-//     Add or subtract a power of 2 from n.
-
-// Return the minimum number of operations to make n equal to 0.
-// A number x is power of 2 if x == 2i where i >= 0.
+// Given the root of a binary tree, split the binary tree into two subtrees by removing one edge such that the product of the sums of the subtrees is maximized.
+// Return the maximum product of the sums of the two subtrees. Since the answer may be too large, return it modulo 10^9 + 7.
+// Note that you need to maximize the answer before taking the mod and not after taking it.
 
 // Example 1:
-// Input: n = 39
-// Output: 3
-// Explanation: We can do the following operations:
-// - Add 20 = 1 to n, so now n = 40.
-// - Subtract 23 = 8 from n, so now n = 32.
-// - Subtract 25 = 32 from n, so now n = 0.
-// It can be shown that 3 is the minimum number of operations we need to make n equal to 0.
+// Input: root = [1,2,3,4,5,6]
+// Output: 110
+// Explanation: Remove the red edge and get 2 binary trees with sum 11 and 10. Their product is 110 (11*10)
 
 // Example 2:
-// Input: n = 54
-// Output: 3
-// Explanation: We can do the following operations:
-// - Add 21 = 2 to n, so now n = 56.
-// - Add 23 = 8 to n, so now n = 64.
-// - Subtract 26 = 64 from n, so now n = 0.
-// So the minimum number of operations is 3.
+// Input: root = [1,null,2,3,4,null,null,5,6]
+// Output: 90
+// Explanation: Remove the red edge and get 2 binary trees with sum 15 and 6.Their product is 90 (15*6)
 
 // Constraints:
-//     1 <= n <= 10^5
+//     The number of nodes in the tree is in the range [2, 5 * 10^4].
+//     1 <= Node.val <= 10^4
 
+
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     public int val;
+ *     public TreeNode left;
+ *     public TreeNode right;
+ *     public TreeNode(int val=0, TreeNode left=null, TreeNode right=null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
 public class Solution {
-    public int MinOperations(int n) {
-        int operations = 0;
-        
-        while (n > 0) {
-            // Если текущий бит равен 1 (число нечетное)
-            if ((n & 1) == 1) {
-                operations++;
-                // Смотрим на второй бит (n & 2). 
-                // Если он тоже 1, значит у нас комбинация ...11. Выгодно прибавить.
-                if ((n & 2) == 2) {
-                    n += 1; // Сложение запускает перенос разрядов
-                } else {
-                    n -= 1; // Одиночная единица, просто вычитаем
-                }
+    private long totalSum = 0;
+    private long maxProduct = 0;
+    private const int MOD = 1000000007;
+
+    public int MaxProduct(TreeNode root) {
+        totalSum = 0;
+        maxProduct = 0;
+
+        // ШАГ 1: Находим полную сумму дерева
+        totalSum = CalculateSum(root);
+
+        // ШАГ 2: Находим максимальное произведение
+        // Мы можем повторно использовать тот же метод, 
+        // так как он обновит maxProduct для каждого поддерева
+        CalculateSum(root);
+
+        // ШАГ 3: Возвращаем результат по модулю
+        return (int)(maxProduct % MOD);
+    }
+
+    private long CalculateSum(TreeNode node) {
+        if (node == null) return 0;
+
+        // Считаем сумму текущего поддерева
+        long currentSubtreeSum = node.val + CalculateSum(node.left) + CalculateSum(node.right);
+
+        // Формула работает корректно только тогда, когда totalSum уже посчитана (на втором проходе)
+        if (totalSum > 0) {
+            long remainingSum = totalSum - currentSubtreeSum;
+            long currentProduct = currentSubtreeSum * remainingSum;
+            
+            if (currentProduct > maxProduct) {
+                maxProduct = currentProduct;
             }
-            // Сдвигаем число вправо на 1 бит, переходя к следующему разряду
-            n >>= 1;
         }
-        
-        return operations;
+
+        return currentSubtreeSum;
     }
 }
